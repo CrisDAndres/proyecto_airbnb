@@ -1,6 +1,6 @@
 # PROYECTO MÓDULO 2: DATASET AIRBNB ROMA 🏛️
 
-![Logo](logorome.png) { width=100px }
+![Logo](logorome.png)
 
 En este proyecto se explorará un conjunto de datos de las viviendas anunciadas en la plataforma Airbnb en esta ciudad de Italia. De esta manera, se analizará el impacto de Airbnb en el mercado de viviendas en una ciudad tan turística como Roma, y los patrones de alquiler, precios y flujos turísticos de la ciudad.
 
@@ -26,4 +26,4 @@ Para ejecutar este proyecto en tu máquina local, sigue los siguientes pasos:
 1. Clona este repositorio en tu máquina local.
 2. Abre el notebook proyecto_airbnb_Roma.ipynb en Jupyter Notebook.
 3. Ejecuta cada celda del notebook en orden para reproducir el análisis y los resultados.
-4. Para la ejecución de la aplicación e Streamlit, asegúrate de tener instalado folium en streamlit (``pip install streamlit-folium``) y ejecuta el archivo app_airbnb.py con el siguiente comando: streamlit run app_airbnb.py
+4. Para la ejecución de la aplicación e Streamlit, asegúrate de tener instalado folium en streamlit (``pip install streamlit-folium``) y ejecuta el archivo app_airbnb.py con el siguiente comando: ``streamlit run app_airbnb.py``
