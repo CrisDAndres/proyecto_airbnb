@@ -1,6 +1,7 @@
 # PROYECTO MÓDULO 2: DATASET AIRBNB ROMA
 
-![Imagen]('roma_ia.jpg') 
+![Imagen]('rome_ia.jpg') 
+
 *Fuente de la imagen: Copilot Designer*
 
 En este proyecto se explorará un conjunto de datos de las viviendas anunciadas en la plataforma Airbnb en esta ciudad de Italia. De esta manera, se analizará el impacto de Airbnb en el mercado de viviendas en una ciudad tan turística como Roma, y los patrones de alquiler, precios y flujos turísticos de la ciudad.
