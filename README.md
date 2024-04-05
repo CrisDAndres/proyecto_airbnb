@@ -1,6 +1,6 @@
 # PROYECTO MÓDULO 2: DATASET AIRBNB ROMA
 
-![Imagen]('rome_ia.jpg') 
+![Imagen](rome_ia.jpg) 
 
 *Fuente de la imagen: Copilot Designer*
 
