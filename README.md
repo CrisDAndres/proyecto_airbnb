@@ -29,7 +29,7 @@ Para ejecutar este proyecto en tu máquina local, sigue los siguientes pasos:
 1. Clona este repositorio en tu máquina local.
 2. Instala las dependencias necesarias ejecutando ``pip install -r requirements.txt``.
 3. Ejecuta cada celda del notebook ``proyecto_airbnb_Roma.ipynb`` en orden para reproducir el análisis y los resultados.
-4. Para la ejecución de la aplicación de Streamlit, clona el archivo ``app_airbnb.py`` en tu máquina local y asegúrate de tener descargada la carpeta ``Data`` en el mismo entorno. A continuación, abre el terminal en el directorio de la app y ejecuta el siguiente comando: ``streamlit run app_airbnb.py``
+4. Para la ejecución de la aplicación de Streamlit, clona el archivo ``app_airbnb.py`` en tu máquina local y asegúrate de tener descargadas la carpetas ``data``, ``img`` y ``html`` en el mismo entorno. A continuación, abre el terminal en el directorio de la app y ejecuta el siguiente comando: ``streamlit run app_airbnb.py``
 
 ### Análisis con Power BI 📊
 
