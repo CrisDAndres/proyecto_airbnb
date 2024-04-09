@@ -337,7 +337,7 @@ elif page == "Análisis exploratorio":
         
         Accomm = df['accommodates'].value_counts().sort_index().reset_index(name='Alojamientos').sort_values(by = 'Alojamientos')
 
-        fig = px.bar(Accomm, y='Alojamientos', x='index',color_discrete_sequence=['#16A085'])
+        fig = px.bar(Accomm, y='Alojamientos', x='index')
         fig.update_layout(
             title='Número de personas que se alojan en las viviendas', title_x=0.3, 
             yaxis_title='Número de alojamientos',
