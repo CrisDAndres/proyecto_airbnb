@@ -1,7 +1,12 @@
 # Análisis del Impacto de Airbnb en el Mercado de Viviendas en Roma 🏛️
 
-![Logo](Rome_prettymaps.png)
-<p align="center">*Fuente: by prettymaps*
+<p align="center"> ![Logo](Rome_prettymaps.png)
+<p align="center"> *Fuente: by prettymaps*
+
+<p align="center">
+  <img src="Rome_prettymaps.png" alt="Logo">
+</p>
+<p align="center">Fuente: by prettymaps</p>
 
 En este proyecto se explorará un conjunto de datos de las viviendas anunciadas en la plataforma Airbnb en la ciudad de Roma. De esta manera, se analizará el impacto de Airbnb en el mercado de viviendas en esta ciudad tan turística, patrones de alquiler, precios y flujos turísticos de la ciudad.
 
