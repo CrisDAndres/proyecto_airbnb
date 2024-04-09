@@ -19,15 +19,15 @@ Los datos con los que se trabajarán corresponden al registro de anuncios de Air
     - Pre-procesamiento de los datos: reparación valores nulos y atípicos.
     - Análisis exploratorio de los datos (EDA), incluyendo la visualización de mapas interactivos y otros gráficos.
     - Conclusiones.
-- **Aplicación de Streamlit**: Se ha desarrollado una aplicación interactiva utilizando Streamlit, que permite la exploración y visualización de los datos analizados. Se puede encontrar en el saiguiente link: METER LINK
+- **Aplicación de Streamlit**: Se ha desarrollado una aplicación interactiva utilizando Streamlit, que permite la exploración y visualización de los datos analizados. Se puede encontrar en el siguiente link: (https://airbnb-rome.streamlit.app/)
 
 ### Instrucciones de Ejecución 💻
 
 Para ejecutar este proyecto en tu máquina local, sigue los siguientes pasos:
 
 1. Clona este repositorio en tu máquina local.
-2. Abre el notebook ``proyecto_airbnb_Roma.ipynb`` en Jupyter Notebook.
-3. Ejecuta cada celda del notebook en orden para reproducir el análisis y los resultados.
+2. Instala las dependencias necesarias ejecutando ``pip install -r requirements.txt``.
+3. Ejecuta cada celda del notebook ``proyecto_airbnb_Roma.ipynb`` en orden para reproducir el análisis y los resultados.
 4. Para la ejecución de la aplicación de Streamlit, clona el archivo ``app_airbnb.py`` en tu máquina local y asegúrate de tener descargada la carpeta ``Data`` en el mismo entorno. A continuación, abre el terminal en el directorio de la app y ejecuta el siguiente comando: ``streamlit run app_airbnb.py``
 
 ### Análisis con Power BI 📊
