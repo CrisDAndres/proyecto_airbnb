@@ -336,7 +336,7 @@ elif page == "Análisis exploratorio":
         st.write('Se puede observar que lo más frecuente son 2 personas. El máximo es 16, que es lo máximo permitido por Airbnb:')
         
         Accomm = df['accommodates'].value_counts().sort_index().reset_index(name='Alojamientos').sort_values(by = 'Alojamientos')
-
+        Accomm = Accomm.rename(columns={'index': 'Indice'})
         fig = px.bar(Accomm, y='Alojamientos', x='index')
         fig.update_layout(
             title='Número de personas que se alojan en las viviendas', title_x=0.3, 
