@@ -2,7 +2,7 @@
 
 ![Logo](Rome_prettymaps.png)
 
-*Fuente: by prettymaps*
+<p align="center">*Fuente: by prettymaps*
 
 En este proyecto se explorará un conjunto de datos de las viviendas anunciadas en la plataforma Airbnb en la ciudad de Roma. De esta manera, se analizará el impacto de Airbnb en el mercado de viviendas en esta ciudad tan turística, patrones de alquiler, precios y flujos turísticos de la ciudad.
 
@@ -19,7 +19,7 @@ Los datos con los que se trabajarán corresponden al registro de anuncios de Air
     - Pre-procesamiento de los datos: reparación valores nulos y atípicos.
     - Análisis exploratorio de los datos (EDA), incluyendo la visualización de mapas interactivos y otros gráficos.
     - Conclusiones.
-- **Aplicación de Streamlit**: Se ha desarrollado una aplicación interactiva utilizando Streamlit, que permite la exploración y visualización de los datos analizados. Se puede encontrar en el siguiente link: (https://airbnb-rome.streamlit.app/)
+- **Aplicación de Streamlit**: Se ha desarrollado una aplicación interactiva utilizando Streamlit, que permite la exploración y visualización de los datos analizados. Está desplegada en (https://airbnb-rome.streamlit.app/)
 
 ### Instrucciones de Ejecución 💻
 
