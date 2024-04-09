@@ -352,7 +352,7 @@ elif page == "Análisis exploratorio":
         # Combinar el código HTML con el CSS
         html_with_css = f"{css_code}\n{source_code}"
         # visualizar el contenido en streamlit
-        components.html(source_code, height = 500, scrolling=True)
+        components.html(source_code, scrolling=True)
         
         st.write('-----')
     # --------------Puntuación general VS Precio
