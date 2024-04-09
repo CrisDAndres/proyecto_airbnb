@@ -341,7 +341,7 @@ elif page == "Análisis exploratorio":
         source_code = HtmlFile.read() 
         print(source_code)
         # visualizar el contenido en streamlit
-        components.html(source_code, height = 500, width = 600)
+        components.html(source_code, width = 900)
         
         st.write('-----')
     # --------------Puntuación general VS Precio
@@ -373,7 +373,7 @@ elif page == "Análisis exploratorio":
         st.markdown('Vemos que el host que más anuncios ha publicado es el número ``23532561``, con **265** anuncios.')
         # Muestro imagen guardada
         image = "img/fig2.png"
-        st.image(image, width=650)
+        st.image(image, width=700)
 
         st.markdown('¿Y en total cuál es la proporción de **host/superhost**?')
         # Crear el gráfico de pastel
@@ -414,7 +414,7 @@ elif page == "Análisis exploratorio":
 
         # Muestro imagen guardada
         image = "img/fig3.png"
-        st.image(image, width=650)
+        st.image(image, width=1000)
         
         st.write('Algunas de las conclusiones que se pueden observar del gráfico de correlación son las siguientes:')
         st.markdown("""
