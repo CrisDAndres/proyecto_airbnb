@@ -341,7 +341,7 @@ elif page == "Análisis exploratorio":
         source_code = HtmlFile.read() 
         print(source_code)
         # visualizar el contenido en streamlit
-        components.html(source_code, height = 600)
+        components.html(source_code, height = 500, width = 600)
         
         st.write('-----')
     # --------------Puntuación general VS Precio
@@ -373,7 +373,7 @@ elif page == "Análisis exploratorio":
         st.markdown('Vemos que el host que más anuncios ha publicado es el número ``23532561``, con **265** anuncios.')
         # Muestro imagen guardada
         image = "img/fig2.png"
-        st.image(image, width=400)
+        st.image(image, width=650)
 
         st.markdown('¿Y en total cuál es la proporción de **host/superhost**?')
         # Crear el gráfico de pastel
@@ -411,30 +411,10 @@ elif page == "Análisis exploratorio":
     # TAB3----------------------------------
     with tab3:
         st.write('Como no sabemos la distribución de las variables, vamos a utilizar la correlación de ``Spearman``:')
-        #reemplazo las variables categóricas a numeros
-        dict_profilepic = {'f':0,'t':1}
-        dict_superhost = {'f':0,'t':1}
-        df['host_has_profile_pic'] = df['host_has_profile_pic'].replace(dict_profilepic)
-        df['host_is_superhost'] = df['host_is_superhost'].replace(dict_superhost)
-        
-        # Método de Spearman (Mide una dependencia no paramétrica y monotónica entre variables) 
-        var = df[['host_response_rate','host_acceptance_rate','host_is_superhost','host_listings_count','host_has_profile_pic','accommodates','price', 'availability_30', 'availability_60', 'availability_90','number_of_reviews','review_scores_rating','review_scores_location','reviews_per_month']]
 
-        corr = var.corr(method='spearman',numeric_only=True) 
-
-        # Generate a mask for the upper triangle
-        mask = np.triu(np.ones_like(corr, dtype=bool)) # con np.triu enmascara el triangulo superior, con np.tril el inferior
-        
-        # Set up the matplotlib figure
-        f, ax = plt.subplots(figsize=(15,13))
-        
-        # Generate a custom diverging colormap
-        cmap = sns.diverging_palette(145, 300, s=60, as_cmap=True)
-
-        # Draw the heatmap with the mask and correct aspect ratio
-        sns.heatmap(corr, mask=mask[0:30,0:30], cmap=cmap, vmax=1, center=0, vmin=-1,  
-                    square=True, linewidths=1, cbar_kws={"shrink": 1}, annot = True)      # cbar_kws={"shrink": 1} es el tamaño de la barra de color
-        st.pyplot()
+        # Muestro imagen guardada
+        image = "img/fig3.png"
+        st.image(image, width=650)
         
         st.write('Algunas de las conclusiones que se pueden observar del gráfico de correlación son las siguientes:')
         st.markdown("""
