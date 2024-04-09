@@ -335,17 +335,14 @@ elif page == "Análisis exploratorio":
         st.markdown('## 2. Nº de personas que se alojan')
         st.write('Se puede observar que lo más frecuente son 2 personas. El máximo es 16, que es lo máximo permitido por Airbnb:')
         
-        Accomm = df['accommodates'].value_counts().sort_index().reset_index(name='Alojamientos').sort_values(by = 'Alojamientos')
-        Accomm = Accomm.rename(columns={'index': 'Indice'})
-        fig = px.bar(Accomm, y='Alojamientos', x='index')
-        fig.update_layout(
-            title='Número de personas que se alojan en las viviendas', title_x=0.3, 
-            yaxis_title='Número de alojamientos',
-            xaxis_title='Número de personas',
-            template='plotly_white',
-            width=1000, height=500) 
-        fig.update_xaxes(dtick=1) #Para que el eje x tome valores de 1 en 1     
-        st.plotly_chart(fig)
+        # Abrir archivo html 
+        HtmlFile = open("html/fig1.html", 'r', encoding='utf-8')
+        # Leer y cargar en la variable source_code
+        source_code = HtmlFile.read() 
+        print(source_code)
+        # visualizar el contenido en streamlit
+        components.html(source_code, height = 600)
+        
         st.write('-----')
     # --------------Puntuación general VS Precio
 
@@ -374,28 +371,10 @@ elif page == "Análisis exploratorio":
         top10_host=df['host_id'].value_counts().head(10)
         top10_host
         st.markdown('Vemos que el host que más anuncios ha publicado es el número ``23532561``, con **265** anuncios.')
-        # Filtrar el DataFrame original para incluir solo las filas de los 10 principales anfitriones
-        df_top10_host = df[df['host_id'].isin(top10_host.index)]
-        df_top10_host['host_listings_count'].sort_values()
-        st.markdown('De esos 10, ¿cuántos son **superhost**?')
-        st.set_option('deprecation.showPyplotGlobalUse', False) #Elimino el warning que me sale en el gráfico
+        # Muestro imagen guardada
+        image = "img/fig2.png"
+        st.image(image, width=400)
 
-        plt.figure(figsize=(8, 5))
-        sns.set_style("white") #Fondo blanco
-        colors = {"f": '#16A085', "t": '#922B21'}
-
-        fig = sns.countplot(data=df_top10_host, y='host_id',hue='host_is_superhost',palette=colors)
-
-
-        fig.set_xlabel('Cantidad de anuncios publicados', fontsize=10) 
-        fig.set_ylabel('Host ID', fontsize=10) 
-        # Ajustar el tamaño de los valores del eje Y
-        fig.tick_params(axis='y', labelsize=10)
-        # Ajustar el tamaño de los valores del eje X
-        fig.tick_params(axis='x', labelsize=10)
-        plt.legend(title='¿Superhost?', labels=['Sí', 'No'], fontsize=10)
-        # Mostrar el gráfico de seaborn
-        st.pyplot()
         st.markdown('¿Y en total cuál es la proporción de **host/superhost**?')
         # Crear el gráfico de pastel
         colors = ['#16A085', '#922B21']
