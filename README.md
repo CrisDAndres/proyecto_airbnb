@@ -1,7 +1,7 @@
 # Análisis del Impacto de Airbnb en el Mercado de Viviendas en Roma 🏛️
 
 <p align="center">
-  <img src="img/Rome_prettymaps.png" alt="Logo">
+  <img src="img/rome_prettymaps.png" alt="Logo">
 </p>
 <p align="center"><em>by prettymaps</em></p>
 
