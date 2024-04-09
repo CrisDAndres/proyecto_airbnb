@@ -1,7 +1,7 @@
 # Análisis del Impacto de Airbnb en el Mercado de Viviendas en Roma 🏛️
 
 <p align="center">
-  <img src="Rome_prettymaps.png" alt="Logo">
+  <img src="img/Rome_prettymaps.png" alt="Logo">
 </p>
 <p align="center"><em>by prettymaps</em></p>
 
@@ -28,8 +28,8 @@ Para ejecutar este proyecto en tu máquina local, sigue los siguientes pasos:
 
 1. Clona este repositorio en tu máquina local.
 2. Instala las dependencias necesarias ejecutando ``pip install -r requirements.txt``.
-3. Ejecuta cada celda del notebook ``proyecto_airbnb_Roma.ipynb`` en orden para reproducir el análisis y los resultados.
-4. Para la ejecución de la aplicación de Streamlit, clona el archivo ``app_airbnb.py`` en tu máquina local y asegúrate de tener descargadas la carpetas ``data``, ``img`` y ``html`` en el mismo entorno. A continuación, abre el terminal en el directorio de la app y ejecuta el siguiente comando: ``streamlit run app_airbnb.py``
+3. Ejecuta el archivo ``app_airbnb.py`` y asegúrate de tener descargadas la carpetas ``data``, ``img`` y ``html`` en el mismo entorno. A continuación, abre el terminal en el directorio de la app y ejecuta el siguiente comando: ``streamlit run app_airbnb.py``.
+4. Se abrirá en navegador web ``http://localhost:8501/`` que te llevará a la app.
 
 ### Análisis con Power BI 📊
 
