@@ -168,7 +168,7 @@ elif page == "Preprocesamiento":
                 #
             st.success('Preprocesamiento completado.')
 
-            st.write('Visualizamos de nuevo el gráfico de cajas de la variable ``price``. y vemos que ya no están esos outliers:')
+            st.write('Visualizamos de nuevo el gráfico de cajas de la variable ``price`` y vemos que ya no están esos outliers:')
             plt.figure(figsize=(10, 5))  # Tamaño del gráfico
             sns.set(style="whitegrid")  # Estilo de la cuadrícula de Seaborn
             fig = sns.boxplot(x="price", data=df, color = '#73C4A8')  # Crear el gráfico de cajas y bigotes
@@ -206,7 +206,7 @@ elif page == "Análisis exploratorio":
     tab1, tab2, tab3, tab4 = st.tabs(
         ['Análisis de los barrios','Otras variables','Análisis de correlación','Reseñas']) 
     with tab1:
-        st.write('En este apartado, podrás obtener diferente información acerca de los alojamientos en los diferentes barrios de Roma, como la cantidad de viviendas de Airbnb, su precio medio o la puntuación media del os alojamientos. Además, podrás explorar de manera interactiva el mapa de Roma. ¡Disfruta explorando!')
+        st.write('En este apartado, podrás obtener diferente información acerca de los alojamientos en los diferentes barrios de Roma, como la cantidad de viviendas de Airbnb, su precio medio o la puntuación media de los alojamientos. Además, podrás explorar de manera interactiva el mapa de Roma. ¡Disfruta explorando!')
         ##  1. Barrio VS Nº alojamientos
 
         st.markdown('## 1. Barrio VS Nº alojamientos')
@@ -339,9 +339,20 @@ elif page == "Análisis exploratorio":
         HtmlFile = open("html/fig1.html", 'r', encoding='utf-8')
         # Leer y cargar en la variable source_code
         source_code = HtmlFile.read() 
-        print(source_code)
+        # Código CSS para ajustar la imagen a la pantalla
+        css_code = """
+        <style>
+            img {
+                width: 100%;
+                height: 100%;
+            }
+        </style>
+        """
+
+        # Combinar el código HTML con el CSS
+        html_with_css = f"{css_code}\n{source_code}"
         # visualizar el contenido en streamlit
-        components.html(source_code, height = 500)
+        components.html(source_code, height = 500, scrolling=True)
         
         st.write('-----')
     # --------------Puntuación general VS Precio
@@ -420,7 +431,7 @@ elif page == "Análisis exploratorio":
         st.markdown("""
                     **CORRELACIÓN POSITIVA**
                     - **Ratio aceptación/respuesta**: siguen una correlación moderada positiva (<span style="font-size:20px;">**0.34**</span>).
-                    - **Superhost** VS **nº reseñas**: tienen una correlación positiva (<span style="font-size:20px;">**0.39**</span>). Además los superhost también tiene una alta correlación con la puntuación general de las reseñas (<span style="font-size:20px;">**0.36**</span>).
+                    - **Superhost** VS nº reseñas**: tienen una correlación positiva (<span style="font-size:20px;">**0.39**</span>). Además los superhost también tiene una alta correlación con la puntuación general de las reseñas (<span style="font-size:20px;">**0.36**</span>).
                     - **Precio VS nº de alojados**: tienen una fuerte correlación (<span style="font-size:20px;">**0.42**</span>), lo cual indica que a más personas, mayor es el precio de la vivienda.
                     
                     **CORRELACIÓN NEGATIVA**
