@@ -341,7 +341,7 @@ elif page == "Análisis exploratorio":
         source_code = HtmlFile.read() 
         print(source_code)
         # visualizar el contenido en streamlit
-        components.html(source_code, width = 900)
+        components.html(source_code, height = 500)
         
         st.write('-----')
     # --------------Puntuación general VS Precio
@@ -434,6 +434,6 @@ elif page == "Análisis exploratorio":
 
         wordcloud = "img/nube_airbnb.png"
 
-        st.image(wordcloud,width=500, use_column_width=True)
+        st.image(wordcloud,width=400, use_column_width=True)
         st.write('-------')
         st.write('Para información del código empleado, visita mi GitHub: https://github.com/CrisDAndres/proyecto_airbnb')
