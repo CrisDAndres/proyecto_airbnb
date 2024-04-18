@@ -38,4 +38,4 @@ Este panel se encuentra dentro de la aplicación de Streamlit.
 
 ### To do
 
-[ ] Implementación de un modelo de machine learning para predecir los precios de los alojamientos en base a una serie de parámetros insertados. 
+- [ ] Implementación de un modelo de machine learning para predecir los precios de los alojamientos en base a una serie de parámetros insertados. 
