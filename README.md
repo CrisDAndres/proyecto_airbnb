@@ -36,6 +36,6 @@ Para ejecutar este proyecto en tu máquina local, sigue los siguientes pasos:
 Se ha realizado un análisis complementario utilizando Power BI, creando un panel interactivo para explorar y comprender los patrones y tendencias en los datos.
 Este panel se encuentra dentro de la aplicación de Streamlit. 
 
-### To do
+### To do ⚙️
 
 - [ ] Implementación de un modelo de machine learning para predecir los precios de los alojamientos en base a una serie de parámetros insertados. 
