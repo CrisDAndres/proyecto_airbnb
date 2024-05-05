@@ -95,7 +95,7 @@ if page == "Home":
     
     st.markdown("""
                 
-                The Advertisements dataset has 29357 rows and 75 columns. In this case, we have created another record with 23 columns, which we are going to work on:
+                The listings dataset has 29357 rows and 75 columns. In this case, we have created another record with 23 columns, which we are going to work on:
 
                 1. ``host:id``:  Host identifier.
                 2. ``host_since``: Date the host joined Airbnb.
