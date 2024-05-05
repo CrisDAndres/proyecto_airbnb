@@ -16,6 +16,7 @@ The data to be worked with corresponds to the register of Airbnb listings publis
 - **Data**: Data for this project was obtained from the website [Inside Airbnb](https://insideairbnb.com/get-the-data/).
 - **Code**: The code used is located in the folder ``notebooks``, and includes three jupyter notebooks with different sections:
     1. ``1_Preprocessing_EDA.ipynb``:
+
       - Loading the libraries and reading the different datasets.
       - Dataset information.
       - Data pre-processing: null and outlier repair.
