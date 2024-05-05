@@ -1,41 +1,50 @@
-# Análisis del Impacto de Airbnb en el Mercado de Viviendas en Roma 🏛️
+# Analysis of the Impact of Airbnb on Rome's Housing Market 🏛️
 
 <p align="center">
   <img src="img/rome_prettymaps.png" alt="Logo">
 </p>
 <p align="center"><em>by prettymaps</em></p>
 
-En este proyecto se explorará un conjunto de datos de las viviendas anunciadas en la plataforma Airbnb en la ciudad de Roma. De esta manera, se analizará el impacto de Airbnb en el mercado de viviendas en esta ciudad tan turística, patrones de alquiler, precios y flujos turísticos de la ciudad.
+This project will explore a dataset of housing advertised on the Airbnb platform in the city of Rome. In this way, it will analyse the impact of Airbnb on the housing market in this very touristic city, rental patterns, prices and tourist flows in the city.
 
-Este análisis permitirá comprender el impacto de esta plataforma y formular posibles regulaciones para abordar los problemas asociados.
+This analysis will allow us to understand the impact of this platform and to formulate possible regulations to address the associated problems.
 
-Los datos con los que se trabajarán corresponden al registro de anuncios de Airbnb publicados en la ciudad de Roma a fecha del 15 de diciembre de 2023. 
+The data to be worked with corresponds to the register of Airbnb listings published in the city of Rome as of 15 December 2023.
 
-### Características del proyecto
+### Project characteristics
 
-- **Datos**: Los datos de este proyecto se obtuvieron de la web [Inside Airbnb](https://insideairbnb.com/get-the-data/).
-- **Código**: El código empleado se encuentra en el notebook ``proyecto_airbnb.ipynb`` e incluye los siguientes apartados:
-    - Carga de librerías y lectura de los diferentes dataset.
-    - Información de los dataset.
-    - Pre-procesamiento de los datos: reparación valores nulos y atípicos.
-    - Análisis exploratorio de los datos (EDA), incluyendo la visualización de mapas interactivos y otros gráficos.
-    - Conclusiones.
-- **Aplicación de Streamlit**: Se ha desarrollado una aplicación interactiva utilizando Streamlit, que permite la exploración y visualización de los datos analizados. Está desplegada en https://airbnb-rome.streamlit.app/
+- **Data**: Data for this project was obtained from the website [Inside Airbnb](https://insideairbnb.com/get-the-data/).
+- **Code**: The code used is located in the folder ``notebooks``, and includes three jupyter notebooks with different sections:
+    1. ``1_Preprocessing_EDA.ipynb``:
+      - Loading the libraries and reading the different datasets.
+      - Dataset information.
+      - Data pre-processing: null and outlier repair.
+      - Exploratory data analysis (EDA), including visualisation of interactive maps and other graphics.
+      - A/B testing
+    2. ``2_wordcloud.ipynb``: Creation of a word cloud visualisation illustrating the frequency and importance of words in the textual data, based on the list reviews.
+    3. ``3_ML_pricepredictor.ipynb``. Implementation of **machine learning models** to predict accommodation prices (regression model):
+        - Preprocessing filtered dataframe used to train models.
+        - Data splitting using train_test_split() from scikit-learn.
+        - Data normalisation using ``StandardScaler()``.
+        - Training of different regression models: ``ElasticNet``, ``Stochastic Gradient Descent``, ``Random Forest``, ``Support Vector Regression``, ``Boosting Gradient Descent``, with *Gradient Boosting* being the best model.
 
-### Instrucciones de Ejecución 💻
+        *Note: Fast Machine Learning from PyCaret was used to select the best model, but Gradient Boosting was used in the end. *. 
+- **Streamlit application**: An interactive Streamlit application has been developed that allows exploration and visualisation of the analysed data. It is available at https://airbnb-rome.streamlit.app/
 
-Para ejecutar este proyecto en tu máquina local, sigue los siguientes pasos:
+### Running instructions 💻
 
-1. Clona este repositorio en tu máquina local.
-2. Instala las dependencias necesarias ejecutando ``pip install -r requirements.txt``.
-3. Ejecuta el archivo ``app_airbnb.py`` y asegúrate de tener descargadas la carpetas ``data``, ``img`` y ``html`` en el mismo entorno. A continuación, abre el terminal en el directorio de la app y ejecuta el siguiente comando: ``streamlit run app_airbnb.py``.
-4. Se abrirá en navegador web ``http://localhost:8501/`` que te llevará a la app.
+To run this project on your local machine, follow the steps below:
 
-### Análisis con Power BI 📊
+1. Clone this repository onto your local machine.
+2. Install the necessary dependencies by running ``pip install -r requirements.txt``.
+3. Run ``app_airbnb.py`` and make sure you have downloaded the ``outputs``, ``img``,``html`` and ``models`` folders in the same environment. Next, open a terminal in the app directory and run the following command ``streamlit run app_airbnb.py``.
+4. This will open a web browser ``http://localhost:8501/`` which will take you to the application.
 
-Se ha realizado un análisis complementario utilizando Power BI, creando un panel interactivo para explorar y comprender los patrones y tendencias en los datos.
-Este panel se encuentra dentro de la aplicación de Streamlit. 
+### Analysis with Power BI 📊
+
+Complementary analysis was performed using Power BI to create an interactive dashboard to explore and understand patterns and trends in the data.
+This dashboard is located within the Streamlit application. 
 
 ### To do ⚙️
 
-- [ ] Implementación de un modelo de machine learning para predecir los precios de los alojamientos en base a una serie de parámetros insertados. 
+- [x] Implementation of a machine learning model to predict accommodation prices based on a set of input parameters. 
