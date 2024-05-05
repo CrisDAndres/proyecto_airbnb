@@ -1,450 +1,490 @@
-# ---------------------LIBRERÍAS----------------------#
+# ---------------------LIBRARIES----------------------#
 import streamlit as st
 import streamlit.components.v1 as components
+from streamlit_option_menu import option_menu
 import numpy as np
 import pandas as pd
 import warnings
+import base64
 from pandas.errors import SettingWithCopyWarning
-# Gráficas
+# Graphics
 import seaborn as sns
 import matplotlib.pyplot as plt
 import plotly_express as px
-import plotly.graph_objects as go
-# Mapas interactivos
+from plotly.subplots import make_subplots
+# interactive maps
 import folium
-from folium import plugins
 from folium.plugins import FastMarkerCluster
-import geopandas as gpd
-from streamlit_folium import st_folium, folium_static
-# Nube de palabras
-from PIL import Image 
+from streamlit_folium import folium_static
+# prediction
+import xgboost as xgb
+import json
+from joblib import load
+from pycaret.regression import load_model
 
 
 warnings.simplefilter(action='ignore', category=(SettingWithCopyWarning))
  
 
-# ---------------------CONFIGURACIÓN DE LA PÁGINA----------------------#
+# ---------------------SITE CONFIG----------------------#
 st.set_page_config(
     page_title="Airbnb: Roma",
     page_icon="🏛️",
-    layout="wide", # Esta opción busca el tam de la pantalla, y de izq a dcha va a intentar que el contenido ocupe el mayor espacio posible
-    initial_sidebar_state="expanded", # o collapsed
+    layout="centered", 
+    initial_sidebar_state="collapsed", 
 )
 
-# ---------------------COSAS QUE VAMOS A USAR EN LA APP----------------------#
+# # ---------------------MENU----------------------# 
 
-# Función para cargar los datos, mantener los datos cargados
-# y evitar recargas innecesarias que puedan reiniciar la aplicación.
+#header image
+st.image("img/mask.png")
+
+page = option_menu(None, ["Home", "Neighbourhoods", "Other information", "Power BI dashboard", "Reviews", "Price predictor"], 
+    icons=["house", "pin-map", "plus", "clipboard-plus", "table", "coin"], 
+    default_index=0, orientation="horizontal",
+    styles={
+        "nav-link": {"font-size": "14px", "text-align": "center", "margin": "0px", "padding": "0px", "--hover-color": "#eee"},
+        "icon": {"margin": "auto", "display": "block"}  # Centered icons
+    }
+)
+
+# ---------------------LOAD DATA----------------------#
+
+# read data
 @st.cache_data()
 def load_data():
-    df_nopreproc = pd.read_csv("data/airbnb_nopreproc.csv") # Antes de cualquier preprocesamiento, solo con algunas columnas elegidas
-    df_preproc1 = pd.read_csv("data/airbnb_preproc1.csv") # Antes de reparar los outliers
     df = pd.read_csv("data/airbnb_limpio.csv")
-    geo_final = pd.read_csv("data/geo_final.csv") 
-    return df_nopreproc, df_preproc1, df, geo_final
+    return df
 
-# Carga de datos
-df_nopreproc, df_preproc1, df, geo_final = load_data()
+# load data
+df = load_data()
 
-# Imágenes
-logo = "img/logorome.png" 
-image = "img/rome_ia.jpg"
+# ---------------------BACKGROUND IMAGE----------------------#
 
-
-# ---------------------HEADER----------------------#
-st.image(image, caption = 'Imagen generada por IA', width=250)
-st.title("Análisis de los alojamientos de Airbnb en Roma")
-st.write('🏛️ ¡Explora esta maravillosa ciudad!')
-
-
-# ---------------------SIDEBAR----------------------#
-
-st.sidebar.image(logo,width=250) 
-st.sidebar.title("ÍNDICE")
-
-# Mejora: Mantener el estado de la selección actual en la barra lateral para evitar reinicios
-page_options = ["Introducción", "Preprocesamiento", "Análisis exploratorio"]
-page = st.sidebar.radio("Seleccione la página:", page_options, index=0, key='current_page')
-
-page_options = ["Introducción", "Preprocesamiento", "Análisis exploratorio"]
-
+def add_bg_from_local(image_file):
+    with open(image_file, "rb") as image_file:
+        encoded_string = base64.b64encode(image_file.read())
+    st.markdown(
+    f"""
+     <style>
+        .stApp {{
+        background-image: url(data:image/{"png"};base64,{encoded_string.decode()});
+        background-size: cover
+    }}
+    </style>
+    """,
+    unsafe_allow_html=True
+    )
+add_bg_from_local("img/rome_background.png")  
 
 # ---------------------BODY----------------------#
 
-# PÁGINA 1-------------------------------------
-if page == "Introducción":
+# PAGE 1-------------------------------------
+if page == "Home":
     
     st.markdown("""
-                ***Roma, la ciudad eterna, ha sido el punto de encuentro de diferentes culturas y religiones con una historia que se remonta a más de dos milenios.
-                Ubicada en la región de Lazio, Roma es la capital del país y la ciudad más grande de la península de Italia.
-                Hoy en día es una metrópolis vibrante que combina la grandeza de su pasado con la vitalidad de una ciudad moderna, que atrae a millones de turistas cada año.***
+                ***Rome, the Eternal City, has been a crossroads of cultures and religions for more than two millennia.
+                Located in the Lazio region, Rome is the capital of Italy and the largest city on the Italian peninsula.
+                Today it is a vibrant metropolis that combines the grandeur of its past with the vitality of a modern city, attracting millions of tourists every year.***
                 """)
 
     st.markdown("""
-             *En este contexto, el mercado de alojamientos de Airbnb en Roma desempeña un papel importante, brindando a los visitantes la oportunidad de sumergirse en la vida cotidiana de la ciudad y experimentarla desde una perspectiva única y personalizada.
-             En este trabajo se analizará la oferta de alojamientos de Airbnb en Roma, explorando sus características, tendencias y su impacto en el mercado inmobiliario y turístico de la ciudad.*
+             *In this context, the Airbnb accommodation market in Rome plays an important role, offering visitors the opportunity to immerse themselves in the daily life of the city and experience it from a unique and personal perspective.
+             This app analyses the supply of Airbnb accommodation in Rome, exploring its characteristics, trends and impact on the city's real estate and tourism markets.*
              """)
     
     st.markdown("""
                 
-                El dataset de los anuncios tiene 29357 filas y 75 columnas. En este caso, a partir de ese dataset se ha creado otro con 23 columnas, que serán sobre las que trabajaremos:
+                The Advertisements dataset has 29357 rows and 75 columns. In this case, we have created another record with 23 columns, which we are going to work on:
 
-                1. ``host:id``: Identificador del anfitrión.
-                2. ``host_since``: Fecha en que el anfitrión se unió a Airbnb.
-                3. ``host_location``: Ubicación del anfitrión.
-                4. ``host_response_rate``: Tasa de respuesta del anfitrión.
-                5. ``host_acceptance_rate``: Tasa de aceptación de las solicitudes de reserva por parte del anfitrión.
-                6. ``host_is_superhost``: Indicador de si el anfitrión es un superhost o no.
-                7. ``host_listings_count``: Número de listados del anfitrión.
-                8. ``host_has_profile_pic``: Indicador de si el anfitrión tiene una foto de perfil.
-                9. ``neighbourhood_cleansed``: Vecindario de la propiedad después de algún tipo de limpieza o normalización.
-                10. ``latitude``: Coordenadas geográficas (latitud) de la propiedad.
-                11. ``longitude``: Coordenadas geográficas (longitud) de la propiedad.
-                12. ``property_type``: Tipo de propiedad.
-                13. ``room_type``: Tipo de habitación ofrecida.
-                14. ``accommodates``: Número máximo de personas que pueden ser alojadas en la propiedad.
-                15. ``bathrooms_text``: Número de baños en la propiedad.
-                16. ``price``: Precio de alquiler por noche de la propiedad.
-                17. ``availability_30``: Disponibilidad de la propiedad en los próximos 30 días.
-                18. ``availability_60``: Disponibilidad de la propiedad en los próximos 60 días.
-                19. ``availability_90``: Disponibilidad de la propiedad en los próximos 90 días.
-                20.	``number_of_reviews``: Número total de reseñas.
-                21.	``review_scores_rating``: Puntuación global.
-                22. ``review_scores_location``: Puntuación de la localización.
-                23.	``reviews_per_month``: Promedio de reseñas recibidas por mes para una propiedad en particular.
+                1. ``host:id``:  Host identifier.
+                2. ``host_since``: Date the host joined Airbnb.
+                3. ``host_location``: Location of the host.
+                4. ``host_response_rate``: Response rate of the host.
+                5. ``host_acceptance_rate``: Host acceptance rate of booking requests.
+                6. ``host_is_superhost``: Indicates whether the host is a superhost or not.
+                7. ``host_listings_count``: Number of listings for the host.
+                8. ``host_has_profile_pic``: Indicates if the host has a profile picture.
+                9. ``neighbourhood_cleansed``: Neighbourhood of the property after some cleaning or normalisation.
+                10. ``latitude``: Geographical coordinates (latitude) of the property.
+                11. ``longitude``: Geographical coordinates (longitude) of the property.
+                12. ``property_type``: Type of property.
+                13. ``room_type``: Type of room offered.
+                14. ``accommodates``: Maximum number of persons that can be accommodated in the property.
+                15. ``bathrooms_text``: Number of bathrooms in the property.
+                16. ``price``: Price per night from
+                17. ``availability_30``: Availability of the property in the next 30 days.
+                18. ``availability_60``: Availability of the property in the next 60 days.
+                19. ``availability_90``: Availability of the property in the next 90 days.
+                20.	``number_of_reviews``: Total number of reviews.
+                21.	``review_scores_rating``: Overall rating.
+                22. ``review_scores_location``: Location score.
+                23.	``reviews_per_month``: Average number of reviews received per month for a given property.
             
                 """  )      
     st.write('------')                    
-    st.markdown('### **Visualización del dataframe filtrado:**')
-    st.dataframe(df_nopreproc.head())
+    st.markdown('### **Visualisation of the pre-processed dataframe:**')
+    st.dataframe(df.head())
+    st.write('Information about the code used can be found on my GitHub: https://github.com/CrisDAndres/proyecto_airbnb')
 
-    
+# PAGE 2-------------------------------------
+elif page == "Neighbourhoods":
 
-# PÁGINA 2-------------------------------------
-elif page == "Preprocesamiento":
-    st.write('En primer lugar, tenemos que preprocesar el dataframe. Para ello se han seguido los siguientes pasos:')
-    st.markdown("""
-                - TRATAMIENTO DE COLUMNAS
-                    - Variable ``price``: Quitamos $ y comas
-                    - Variables ``host_response_rate`` y ``host_acceptance_rate``: Eliminamos % detrás del número                 
-                - TRATAMIENTO DE VALORES NULOS
-                    - Imputación con la media: variables con números reales (``host_response_rate``,``host_acceptance_rate``,``price``,``review_scores_rating``,``review_scores_location``,``reviews_per_month``)
-                    - Imputación con la mediana: variables con números enteros (``host_listings_count``)                 
-                - TRATAMIENTO DE OUTLIERS
-                    - Variable ``price``             
-                
-                
-                Para información del código empleado, visita mi GitHub: https://github.com/CrisDAndres/proyecto_airbnb
-                
-                ---------------------
-        """)
-    st.markdown('### **Para la visualización de los valores atípicos, obtenemos los parámetros estadísticos de las variables numéricas de interés:**')
-    st.code("df.describe().T",language = 'python')
-    # Configura la visualización de los números en notación decimal
-    pd.set_option('display.float_format', lambda x: '%.2f' % x)
-    # selecciono las variables que me interesan
-    var = df_preproc1[['host_response_rate','host_acceptance_rate','host_is_superhost','host_listings_count','host_has_profile_pic','accommodates','price', 'availability_30', 'availability_60', 'availability_90','number_of_reviews','review_scores_rating','review_scores_location','reviews_per_month']]
-    # Aplicar la función describe() solo a las columnas numéricas
-    var.describe().T
-    st.write('Entre los parámetros estadísticos de las diferentes variables, destaca la desviación estándar de la variable ``price``. Vamos a visualizarla:')
-    # Crear el gráfico de cajas y bigotes
-    st.set_option('deprecation.showPyplotGlobalUse', False) #Elimino el warning que me sale en el gráfico
-    plt.figure(figsize=(10, 5))  # Tamaño del gráfico
-    sns.set(style="whitegrid")  # Estilo de la cuadrícula de Seaborn
-    fig = sns.boxplot(x="price", data=df_preproc1, color = '#73C4A8')  # Crear el gráfico de cajas y bigotes
-    fig.set_xlabel('Precios', fontsize=14)
-    # Mostrar el gráfico de seaborn
-    st.pyplot()
-        
-    st.write("""Hay valores atípicos superiores.
-                    Consideramos valor atípico superior lo que esté fuera del intervalo ``Q3 + Rango Intercuartílico (IQR) x 1.5``.
-                    Reemplazamos esos valores atípicos por ese límite superior.
-                    """)
-        
-    if st.button('Realizar preprocesamiento'):
-        with st.spinner('Preprocesando...'):
-                # Código de preprocesamiento
-                # (No voy a hacerlo en Streamlit, simplemente a visualizarlo)
-                #
-            st.success('Preprocesamiento completado.')
-
-            st.write('Visualizamos de nuevo el gráfico de cajas de la variable ``price`` y vemos que ya no están esos outliers:')
-            plt.figure(figsize=(10, 5))  # Tamaño del gráfico
-            sns.set(style="whitegrid")  # Estilo de la cuadrícula de Seaborn
-            fig = sns.boxplot(x="price", data=df, color = '#73C4A8')  # Crear el gráfico de cajas y bigotes
-            fig.set_xlabel('Precios', fontsize=14)
-            # Mostrar el gráfico de seaborn
-            st.pyplot()
-            st.write('Tampoco hay nulos en las variables de interés, y están las columnas corregidas. El dataframe preprocesado se ve así:')
-            st.dataframe(df.head())
-
-
-
-# PÁGINA 3-------------------------------------
-elif page == "Análisis exploratorio":
-
-    st.markdown("""
-                Una vez preprocesados los datos, vamos a explorar las distintas variables para ver la información que nos ofrecen.
-                ------------------------                
-        """)
-
-    st.markdown('Primero vamos a echar un vistazo al mapa y a los diferentes alojamientos y sus ubicaciones. Si aumentas el mapa, irán apareciendo más:')
-    latitudes = df['latitude'].tolist()
-    longitudes = df['longitude'].tolist()
-    coordenadas = list(zip(latitudes,longitudes))
-    # Defino la ubicacion inicial del mapa
+    st.markdown('Here you can see the different accommodations on offer and where they are located. Zoom in on the map to see more:')
+    latitud = df['latitude'].tolist()
+    longitud = df['longitude'].tolist()
+    coordinates = list(zip(latitud,longitud))
+    # define the initial location of the map
     latitud_1 = df['latitude'].iloc[0]
     longitud_1 = df['longitude'].iloc[0]
-    # Crear el mapa de Folium con la ubicación inicial especificada
+    # create the Folium map with the specified starting location
     map = folium.Map(location = [latitud_1,longitud_1],zoom_start=10)
-    # Añadir las ubicaciones al mapa generado de Folium
-    FastMarkerCluster(data=coordenadas).add_to(map) # Se usa para agrupar los marcadores mas cercanos en clusteres
+    # Adding locations to the generated Folium map
+    FastMarkerCluster(data=coordinates).add_to(map) # It is used to group the closest markers into clusters.
     folium.Marker(location=[latitud_1,longitud_1]).add_to(map)
-    folium_static(map) #con st_folium no me funcionaba en el Explore
+    folium_static(map) 
+    
+    st.markdown("""
+            ### What would you like to know? Select a tab:              
+        """)
 
     # ---------------------TABS (pestañas)----------------------#
     tab1, tab2, tab3, tab4 = st.tabs(
-        ['Análisis de los barrios','Otras variables','Análisis de correlación','Reseñas']) 
+        ['Accomodations','Price', 'Score','Maps']) 
     with tab1:
-        st.write('En este apartado, podrás obtener diferente información acerca de los alojamientos en los diferentes barrios de Roma, como la cantidad de viviendas de Airbnb, su precio medio o la puntuación media de los alojamientos. Además, podrás explorar de manera interactiva el mapa de Roma. ¡Disfruta explorando!')
-        ##  1. Barrio VS Nº alojamientos
+        
+        ##  1. Neighbourhood VS No. of accommodations
 
-        st.markdown('## 1. Barrio VS Nº alojamientos')
-        st.write('En primer lugar, nos interesa saber la distribución de los alojamientos por cada barrio. Vemos que en el centro histórico el número de alojamientos o anuncios es mucho mayor en comparación con los demás barrios:')
+        st.markdown('### Neighbourhood VS No. of accommodations')
+        st.write('First of all, we are interested in the distribution of accommodation in each neighbourhood. We can see that in the historic centre the number of accommodations or advertisements is much higher than in the other districts:')
             
-        aloj_barrio = df['neighbourhood_cleansed'].value_counts().sort_values(ascending=True)
+        accom_neigh = df['neighbourhood_cleansed'].value_counts().sort_values(ascending=True)
             
-        #Gráfica de barras de plotly
-        fig = px.bar(aloj_barrio, x=aloj_barrio.values, y=aloj_barrio.index,color=aloj_barrio.values, color_continuous_scale='BrBG', text_auto = False) #Con text_auto sale el nombre del conteo en cada barra
-        #actualizamos el layout
+        #Plotly bar chart
+        fig = px.bar(accom_neigh, x=accom_neigh.values, y=accom_neigh.index,color=accom_neigh.values, color_continuous_scale='BrBG', text_auto = False) 
         fig.update_layout(
-                title='Número de alojamientos por barrios de Roma', title_x=0.35, 
-                yaxis_title='Barrios de Roma',
-                xaxis_title='Número de alojamientos',
+                title='Number of accommodations by neighbourhood in Rome', title_x=0.23, 
+                yaxis_title='Neighbourhoods',
+                xaxis_title='No. of Airbnb offers',
                 template='plotly_white',
-                width=1000, height=500, coloraxis_colorbar_title='Nº alojamientos')  # Agregar título a la leyenda de colores) 
+                width=690, height=500, coloraxis_colorbar_title='No. of Airbnb offers')   
 
-        # Mostrar el gráfico de plotly
         st.plotly_chart(fig)
-            
-        ## 2. Barrio VS Precio medio
+   
+    with tab2:
+                
+        ## 2. Neighbourhood VS Average price
 
-        st.markdown('## 2. Barrio VS Precio medio')
-        st.write('También interesaría saber el precio medio por cada barrio. Como era de esperar, alojarse en el centro histórico es más caro:')
+        st.markdown('### Neighbourhood VS Average price')
+        st.write('It would also be interesting to know the average price for each neighbourhood. As expected, staying in the historic centre is more expensive:')
             
-        barrio_precio = df.groupby('neighbourhood_cleansed')['price'].mean().sort_values(ascending=True)
+        neigh_price = df.groupby('neighbourhood_cleansed')['price'].mean().sort_values(ascending=True)
             
-        #Gráfica de barras de plotly
-        fig = px.bar(barrio_precio,
-                        color=barrio_precio.values,
+        #Plotly bar chart
+        fig = px.bar(neigh_price,
+                        color=neigh_price.values,
                         color_continuous_scale='tempo', 
                         template='plotly_white',
-                        width=1000, height=500)
+                        width=690, height=500)
 
-        fig.update_layout(title='Precio medio por alojamiento y barrios', title_x=0.35, coloraxis_colorbar_title='Precio medio', 
-        xaxis_title='Barrios de Roma',
-        yaxis_title='Precio medio por noche')
+        fig.update_layout(title='Average price per accommodation and neighbourhood', title_x=0.23, coloraxis_colorbar_title='Average price', 
+        xaxis_title='Neighbourhoods',
+        yaxis_title='Average price per night')
 
-        # Mostrar el gráfico de plotly
         st.plotly_chart(fig)
-         
-        ##  3. Barrio VS Puntuación
-        st.markdown('## 3. Barrio VS Puntuación')
-        st.markdown('También algo importante es saber la puntuación media por cada barrio, en una escala de 0 a 5 ★.')
-        st.markdown('**Empezaremos mirando la puntuación general:**')
-        # Puntuación general
-        punt_barrio_general = df.groupby('neighbourhood_cleansed')['review_scores_rating'].mean().sort_values().reset_index()
-        fig = px.bar(punt_barrio_general, x='review_scores_rating', y='neighbourhood_cleansed', color='review_scores_rating', color_continuous_scale='tempo')
-        fig.update_layout(height=500, width=1000, title_text="Puntuación de los alojamientos por barrios (0-5 ★)", title_x=0.3,xaxis_title='Puntuación general',yaxis_title='', coloraxis_colorbar_title='Puntuación')  
-          # Separar los números del eje y por 1 en 1
+    
+    with tab3:
+                 
+        ##  3. Neighbourhood VS Score
+        st.markdown('### Neighbourhood VS Score')
+        st.markdown('It is also important to know the average score for each neighbourhood, on a scale of 0 to 5 ★.')
+        
+        st.markdown('**We will start by looking at the overall score:**')
+        # General score
+        general_score_neigh = df.groupby('neighbourhood_cleansed')['review_scores_rating'].mean().sort_values().reset_index()
+        fig = px.bar(general_score_neigh, x='review_scores_rating', y='neighbourhood_cleansed', color='review_scores_rating', color_continuous_scale='tempo')
+        fig.update_layout(height=500, width=690, title_text="Accommodation score by neighbourhood (0-5 ★)", title_x=0.23,xaxis_title='General score',yaxis_title='', coloraxis_colorbar_title='Score')  
+        
         fig.update_yaxes(
-        tickvals=list(range(len(punt_barrio_general['neighbourhood_cleansed']))),
+        tickvals=list(range(len(general_score_neigh['neighbourhood_cleansed']))),
         tickmode='array') 
         st.plotly_chart(fig)
             
-        st.markdown('**Y ahora la puntuación por la localización:**')
-        # Puntuación de la localización
-        punt_barrio_localiz = df.groupby('neighbourhood_cleansed')['review_scores_location'].mean().sort_values().reset_index()
-        fig = px.bar(punt_barrio_localiz, x='review_scores_location', y='neighbourhood_cleansed', color='review_scores_location', color_continuous_scale='tempo')
-        fig.update_layout(height=500, width=1000, title_text="Puntuación de los alojamientos por barrios (0-5 ★)", title_x=0.3,xaxis_title='Puntuación de la localización',yaxis_title='',coloraxis_colorbar_title='Puntuación')
+        st.markdown('**And now the localisation score:**')
+        # Localisation score
+        loc_score_neigh = df.groupby('neighbourhood_cleansed')['review_scores_location'].mean().sort_values().reset_index()
+        fig = px.bar(loc_score_neigh, x='review_scores_location', y='neighbourhood_cleansed', color='review_scores_location', color_continuous_scale='tempo')
+        fig.update_layout(height=500, width=690, title_text="Accommodation score by neighbourhood (0-5 ★)", title_x=0.23,xaxis_title='Localisation score',yaxis_title='',coloraxis_colorbar_title='Score')
         st.plotly_chart(fig)
+    
+    with tab4:
+            
+        # 4. INTERACTIVE MAPS
+        st.markdown('### INTERACTIVE MAPS') 
+        st.write('Finally, we can analyse these 3 points by visualising them on interactive maps. There are two different layers, so you can decide whether you want to see the neighbourhoods by average price or by overall score:')
         
-        # 4. MAPAS INTERACTIVOS
-        st.markdown('## 4. MAPAS INTERACTIVOS') 
-        st.write('Por último, podemos hacer un análisis de estos 3 puntos visualizándolos mediante mapas interactivos:')
-        
-        # Abrir archivo html con la información de los mapas generados con folium en modo lectura
+        # Open html file with the information of the maps generated with folium in read mode.
         HtmlFile = open("html/rome_map.html", 'r', encoding='utf-8')
-        # Leer y cargar en la variable source_code
+        # Read and load into source_code variable
         source_code = HtmlFile.read() 
         print(source_code)
-        # visualizar el contenido en streamlit
+        # view content on streamlit
         components.html(source_code, height = 600)
         
-        st.write('Mediante este mapa de calor podemos ver el precio medio de las viviendas de airbnb:')
-        HtmlFile = open("html/rome_hmap.html", 'r', encoding='utf-8')
-        source_code = HtmlFile.read() 
-        print(source_code)
-        components.html(source_code, height = 600)
         
-    # TAB2----------------------------------
-
-    with tab2:
-        st.markdown('## 1. Tipos de alojamiento en los anuncios de Airbnb ')
-        st.write("""**Análisis de la cantidad de propiedades diferentes por cada tipo de habitación anunciadas en la plataforma.
-                 Se mostrarán las más frecuentes (+ de 200 apariciones) y las menos frecuentes (menos de 50).**""")
-    # --------------Alojamientos más frecuentes
+# PAGE 3----------------------------------
+elif page == "Other information":
+    
+    # --------------Most common accommodation
         
-        # Gráfico de barras plotly de los alojamientos más frecuentes
-        aloj = df.groupby(['property_type', 'room_type']).size().reset_index(name='count') # size() calcula el tamaño de cada grupo (nº de room_type de cada grupo de property_type)
-        aloj = aloj[aloj['count']>200].sort_values(by=['count']) #Selecciono solo los tipos de propiedad que aparecen más de 200 veces y ordeno los valores por las apariciones        
+        st.markdown('### 1. Types of accommodation in Airbnb listings')
+        st.write("""**Analysis of the number of properties for each type of space advertised on the platform.
+                 The most frequent (+ 200 appearances) and the least frequent (less than 50) are displayed.**""")
+        
+        # Bar chart plotly of the most frequent accommodations
+        accom = df.groupby(['property_type', 'room_type']).size().reset_index(name='count') # size() calculates the size of each group (no. of room_type of each property_type group)
+        accom1 = accom[accom['count']>200].sort_values(by=['count']) 
+        accom2 = accom[accom['count']<5].sort_values(by=['count'],ascending=False) 
+        
+        # define colors
         colors = {'Entire home/apt': '#F5B041', 'Private room': '#AF7AC5', 'Hotel room': '#16A085','Shared room':'#ABEBC6'}
-        fig = px.bar(aloj, y='property_type', x='count', color='room_type',color_discrete_map=colors)  
+        # Make subplots
+        fig = make_subplots(rows=1, cols=2)
+
+        fig = px.bar(accom1, y='property_type', x='count', color='room_type',color_discrete_map=colors)  
 
         fig.update_layout(yaxis={'categoryorder':'total ascending'},
-            title='Cantidad de alojamientos más frecuentes (> 200 anuncios)', title_x=0.3, 
-            xaxis_title='Cantidad de alojamientos por tipo',
-            yaxis_title='Tipo de propiedad',
+            title='Number of most frequent accommodations (> 200 listings)', title_x=0.2, 
+            xaxis_title='Number of accommodations by type',
+            yaxis_title='Property type',
             template='plotly_white',
-            width=1000, height=600, legend_title='Tipo de habitación/apt')
+            width=690, height=600, legend_title='Room/apt type')
         st.plotly_chart(fig)
 
-        st.write('Se puede observar como el **top3** de alojamientos ofertados más frecuentes son:')
-        st.markdown("""           
-                  - Vivienda completa
-                  - Condominios completos
-                  - Habitación privada en vivienda""")
-        
-        st.markdown('**Ahora voy a graficar los alojamientos menos frecuentes (menos de 50 veces)**')
-        aloj = df.groupby(['property_type', 'room_type']).size().reset_index(name='count') 
-        aloj = aloj[aloj['count']<5].sort_values(by=['count'],ascending=False) #Selecciono solo los tipos de propiedad que aparecen menos de 50 veces
-
-        fig = px.bar(aloj, y='property_type', x='count', color='room_type',color_discrete_map=colors)
+        st.write('-----')
+    
+        fig = px.bar(accom2, y='property_type', x='count', color='room_type',color_discrete_map=colors)
 
         fig.update_layout(yaxis={'categoryorder':'total ascending'},
-            title='Cantidad de alojamientos menos frecuentes (< 50 anuncios)', title_x=0.3, 
-            xaxis_title='Cantidad de alojamientos por tipo',
-            yaxis_title='Tipo de propiedad',
+            title='Number of less frequent accommodations (< 50 listings)', title_x=0.23, 
+            xaxis_title='Number of accommodations by type',
+            yaxis_title='Property type',
             template='plotly_white', xaxis=dict(dtick=1),
-            width=1000, height=600, legend_title='Tipo de habitación/apt')
+            width=695, height=600, legend_title='Room/apt type')
         st.plotly_chart(fig)
             
-        st.markdown('Se puede observar como los alojamientos ofertados 1 sola vez son algo curiosos, destacando alojamientos en **molinos de viento** *(windmill)*, **castillos** o **barcos**.')
         st.write('-----')
-    # --------------Nº de personas que se alojan
-        st.markdown('## 2. Nº de personas que se alojan')
-        st.write('Se puede observar que lo más frecuente son 2 personas. El máximo es 16, que es lo máximo permitido por Airbnb:')
+    
+    # --------------No. of people staying
+        st.markdown('### 2. No. of people staying')
+        st.write('You can see that the most common number is 2 people. The maximum is 16, which is the maximum allowed by Airbnb:')
         
-        # Abrir archivo html 
-        HtmlFile = open("html/fig1.html", 'r', encoding='utf-8')
-        # Leer y cargar en la variable source_code
-        source_code = HtmlFile.read() 
-        # Código CSS para ajustar la imagen a la pantalla
-        css_code = """
-        <style>
-            img {
-                width: 100%;
-                height: 100%;
-            }
-        </style>
-        """
+        Accomm = df['accommodates'].value_counts().sort_index()
 
-        # Combinar el código HTML con el CSS
-        html_with_css = f"{css_code}\n{source_code}"
-        # visualizar el contenido en streamlit
-        components.html(source_code, height = 600, scrolling=True)
-        
+        fig = px.bar(Accomm, x=Accomm.index, y=Accomm.values, color_discrete_sequence=['#16A085'])
+        fig.update_layout(
+            title='Number of persons staying in accommodations', title_x=0.25, 
+            yaxis_title='No. of accommodations',
+            xaxis_title='No. of people',
+            template='plotly_white',
+            width=695, height=500) 
+        fig.update_xaxes(dtick=1)     
+        st.plotly_chart(fig)
         st.write('-----')
-    # --------------Puntuación general VS Precio
+    
+    
+    # --------------General score VS Price
 
-        st.markdown('## 3. Puntuación general VS Precio')
-        st.write("""Vamos a observar la relación entre estas 2 variables continuas. Observamos como los alojamientos más caros no son los que tienen una mejor puntuación.
-                 Sorprendentemente, la mayor proporción de alojamientos con buenas puntuaciones están por debajo del precio medio:""")
-        punt_precio = df.groupby('review_scores_rating')['price'].mean().sort_values().reset_index()
-        precio_medio = df['price'].mean().round(2)
-        # Crear un scatter plot
-        fig = px.scatter(punt_precio, y='price', x='review_scores_rating',opacity=0.7, labels={'price': 'Precio', 'review_scores_rating': 'Puntuación general (0-5)'})
-        fig.update_layout(height=500, width=1000, title_text="Relación entre el precio y la puntuación general de los alojamientos", title_x=0.3,xaxis_title="Puntuación general (0-5)", yaxis_title="Precio",
-                        )  
-        # Actualizar el tamaño de los marcadores
+        st.markdown('### 3. General score VS Price')
+        st.write("""Let's look at the relationship between these 2 continuous variables. We see that the most expensive accommodations are not the ones with the best scores.
+                 Surprisingly, the highest proportion of accommodations with good scores are below the average price:""")
+        score_price = df.groupby('review_scores_rating')['price'].mean().sort_values().reset_index()
+        mean_price = df['price'].mean().round(2)
+        # scatter plot
+        fig = px.scatter(score_price, y='price', x='review_scores_rating',opacity=0.7, labels={'price': 'Price', 'review_scores_rating': 'General score (0-5)'})
+        fig.update_layout(height=500, width=695, title_text="Relationship between price and general accommodation score", title_x=0.2,xaxis_title="General score (0-5)", yaxis_title="Price",
+                  )  
         fig.update_traces(marker=dict(size=7)) 
-        # Agregar la línea horizontal para la media del precio
-        fig.add_hline(y=precio_medio, line_dash="dot", line_color="red", annotation_text=f"Precio medio: {precio_medio}",
+        # Add the horizontal line for the average of the price
+        fig.add_hline(y=mean_price, line_dash="dot", line_color="red", annotation_text=f"Mean price: {mean_price}",
                     annotation_position="top left")
         st.plotly_chart(fig)
         st.write('-----')
 
     # --------------top10 host
 
-        st.markdown('## 4. Top 10 host')
-        st.markdown('Vamos a calcular los 10 host que más anuncios tienen:')
-        # Calculamos el top 10 de host con más anuncios
+        st.markdown('## 4. Top10 host')
+        st.markdown("Let's calculate the top 10 hosts with the highest number of listings:")
+        # Calculate the top10 host with the most listings
         top10_host=df['host_id'].value_counts().head(10)
-        top10_host
-        st.markdown('Vemos que el host que más anuncios ha publicado es el número ``23532561``, con **265** anuncios.')
-        # Muestro imagen guardada
-        image = "img/fig2.png"
-        st.image(image, width=700)
+        # Filter the original DataFrame to include only the rows of the top 10 hosts
+        df_top10_host = df[df['host_id'].isin(top10_host.index)]
+        df_top10_host['host_listings_count'].sort_values()
+        
+        st.set_option('deprecation.showPyplotGlobalUse', False) #remove the warning that I get in the graphic.
 
-        st.markdown('¿Y en total cuál es la proporción de **host/superhost**?')
-        # Crear el gráfico de pastel
+        plt.figure(figsize=(8, 5))
+        sns.set_style("white") 
+        colors = {"f": '#16A085', "t": '#922B21'}
+
+        fig = sns.countplot(data=df_top10_host, y='host_id',hue='host_is_superhost',palette=colors)
+
+        fig.set_xlabel('Number of listings published', fontsize=10) 
+        fig.set_ylabel('Host ID', fontsize=10) 
+
+        fig.tick_params(axis='y', labelsize=10)
+        fig.tick_params(axis='x', labelsize=10)
+        plt.legend(title='¿Superhost?', labels=['Yes', 'No'], fontsize=10)
+        st.pyplot()
+        
+        st.markdown('We see that the host with the most ads is the number ``23532561``, with **265** ads. This is probably a company that is professionally involved in holiday rentals.')
+        st.markdown('Of those 10, only 2 are **superhost**.')
+    
+        st.markdown('And in total what is the **host/superhost** ratio?')
+        # Pie chart
         colors = ['#16A085', '#922B21']
         fig = px.pie(values=df['host_is_superhost'].value_counts(), names=['No superhost','SUPERHOST'], color_discrete_sequence=colors, hole=0.3)
         fig.update_layout(title='',width=700, height=500, showlegend=True,  title_x=0.5, template = 'plotly_white',legend=dict(
-                orientation='h',  # Orientación horizontal
-                y=-0.05,  # Desplazamiento vertical desde el gráfico (0-1)
-                xanchor='center',  # Ancla en el centro horizontal
-                x=0.5  # Desplazamiento horizontal desde el gráfico (0-1)
+                orientation='h',  # Horizontal orientation
+                y=-0.05,  # Vertical offset from the graph (0-1)
+                xanchor='center',  
+                x=0.5  # Horizontal offset from the graph (0-1)
             ))
         fig.update_traces(textinfo='percent',textfont_size=20, marker = dict(line = dict(color = 'black', width = 0.5)))
         fig.update_traces()
 
         st.plotly_chart(fig)
         
-        st.markdown('De los datos podemos pensar que no es fácil conseguir ser Superhost. **Para conseguir el distintivo, debes ser el propietario del anuncio y tener una cuenta en regla que cumpla los siguientes requisitos:**')
+        st.markdown('From the data we can see that it is not easy to become a Superhost. **To get the badge, you must be the owner of the ad and have an account in good standing that meets the following requirements:**')
 
         st.markdown("""
-- Haber completado como mínimo 10 estancias o 3 reservas que sumen al menos **100 noches** en total.
-- Haber mantenido un índice de respuesta del **90 %** o un porcentaje superior.
-- Haber mantenido un índice de cancelación de **menos del 1 %**.
-- Haber mantenido una valoración general de **4,8**.""")
-    
-        #---------------panel powerBI
-        st.write('---------')
-        st.markdown('#### Podemos ver de manera interactiva la relación entre las variables mediante este panel de Power BI, en el que podrás elegir el barrio que te interese y poder decidir su relación calidad-precio y si se ajusta a tus necesidades:')
+- Completed at least 10 stays or 3 bookings totalling at least **100 nights**.
+- Maintained a response rate of **90%** or higher.
+- Maintained a cancellation rate of **less than 1%**.
+- Maintained an overall rating of **4.8**.""")
         
-        # Código HTML del panel de Power BI
-        html_code =  """<iframe title="panel_airbnb" width="600" height="373.5" src="https://app.powerbi.com/view?r=eyJrIjoiZjNjMzMwZTUtYzhiMy00NmJlLTg0NGEtMTNlOTI5ODdkODgwIiwidCI6IjhhZWJkZGI2LTM0MTgtNDNhMS1hMjU1LWI5NjQxODZlY2M2NCIsImMiOjl9" frameborder="0" allowFullScreen="true"></iframe>
-        """
-        # Insertar el código HTML en la aplicación de Streamlit
-        components.html(html_code, height = 1000)
-    
-    # TAB3----------------------------------
-    with tab3:
-        st.write('Como no sabemos la distribución de las variables, vamos a utilizar la correlación de ``Spearman``:')
-
-        # Muestro imagen guardada
-        image = "img/fig3.png"
-        st.image(image, width=1000)
+        # --------------correlation
         
-        st.write('Algunas de las conclusiones que se pueden observar del gráfico de correlación son las siguientes:')
+        st.write('As we do not know the distribution of the variables, we will use the Spearman correlation:')
+        #replace categorical variables with numbers.
+        dict_profilepic = {'f':0,'t':1}
+        dict_superhost = {'f':0,'t':1}
+        df['host_has_profile_pic'] = df['host_has_profile_pic'].replace(dict_profilepic)
+        df['host_is_superhost'] = df['host_is_superhost'].replace(dict_superhost)
+        
+        # Spearman's method (measures non-parametric and monotonic dependence between variables).
+        var = df[['host_response_rate','host_acceptance_rate','host_is_superhost','host_listings_count','host_has_profile_pic','accommodates','price', 'availability_30', 'availability_60', 'availability_90','number_of_reviews','review_scores_rating','review_scores_location','reviews_per_month']]
+        corr = var.corr(method='spearman',numeric_only=True) 
+        # Generate a mask for the upper triangle
+        mask = np.triu(np.ones_like(corr, dtype=bool)) 
+        # Set up the matplotlib figure
+        f, ax = plt.subplots(figsize=(15,13))       
+        # Generate a custom diverging colormap
+        cmap = sns.diverging_palette(145, 300, s=60, as_cmap=True)
+        # Draw the heatmap with the mask and correct aspect ratio
+        sns.heatmap(corr, mask=mask[0:30,0:30], cmap=cmap, vmax=1, center=0, vmin=-1,  
+                    square=True, linewidths=1, cbar_kws={"shrink": 1}, annot = True)      # cbar_kws={"shrink": 1} es el tamaño de la barra de color
+        st.pyplot()
+        
+        st.write('Some of the conclusions that can be drawn from the correlation graph are as follows:')
         st.markdown("""
-                    **CORRELACIÓN POSITIVA**
-                    - **Ratio aceptación/respuesta**: siguen una correlación moderada positiva (<span style="font-size:20px;">**0.34**</span>).
-                    - **Superhost** VS nº reseñas**: tienen una correlación positiva (<span style="font-size:20px;">**0.39**</span>). Además los superhost también tiene una alta correlación con la puntuación general de las reseñas (<span style="font-size:20px;">**0.36**</span>).
-                    - **Precio VS nº de alojados**: tienen una fuerte correlación (<span style="font-size:20px;">**0.42**</span>), lo cual indica que a más personas, mayor es el precio de la vivienda.
+                    **POSITIVE CORRELATION**
+                    - **Acceptance/response ratio**: follow a moderate positive correlation (<span style="font-size:20px;">**0.34**</span>).
+                    - **Superhost** VS **No. of reviews**: follow a positive correlation (<span style="font-size:20px;">**0.39**</span>). In addition, superhost also has a high correlation with the general review score (<span style="font-size:20px;">**0.36**</span>).
+                    - **Price VS No. of housed persons**: have a strong correlation (<span style="font-size:20px;">**0.42**</span>), indicating that the more people, the higher the house price.
                     
-                    **CORRELACIÓN NEGATIVA**
-                    - **Disponibilidad VS Superhost**: tienen una correlación negativa, lo cual indica que hay más probabilidad de que los superhost agoten antes la disponibilidad de sus alojamientos.
-                    - **Precio VS reseñas al mes**: tienen correlación negativa (<span style="font-size:20px;">**- 0.16**</span>), lo cual indica que a mayores precios tengan los alojamientos, menos reseñas tienen cada mes.""",unsafe_allow_html=True)
+                    **NEGATIVE CORRELATION**
+                    - **Availability VS Superhost**: have a negative correlation, suggesting that superhosts are more likely to use up their availability earlier.
+                    - **Price VS reviews per month**: have a negative correlation (<span style="font-size:20px;">**- 0.16**</span>), indicating that the higher the prices of accommodation, the fewer reviews they have each month.""",unsafe_allow_html=True)
 
-    # TAB4----------------------------------
-    with tab4:
-        st.markdown('Con las reseñas de los alojamientos, se ha creado una nube de palabras, en la que se pueden ver las palabras más frecuentes en base a su tamaño:')   
+# PAGE 4-------------------------------------
+elif page == "Power BI dashboard":
+        st.write('---------')
+        st.markdown(
+            '<div style="text-align: justify;">'
+            'We can interactively see the relationship between the variables using this Power BI dashboard, where you can select the neighbourhood you are interested in and decide its value for money and whether it fits your needs:'
+            '</div>',
+            unsafe_allow_html=True
+        )            
+        # HTML code of the Power BI dashboard
+        html_code = """
+        <div style="display: flex; justify-content: center;">
+            <iframe title="panel_airbnb" width="600" height="373.5" src="https://app.powerbi.com/view?r=eyJrIjoiZjNjMzMwZTUtYzhiMy00NmJlLTg0NGEtMTNlOTI5ODdkODgwIiwidCI6IjhhZWJkZGI2LTM0MTgtNDNhMS1hMjU1LWI5NjQxODZlY2M2NCIsImMiOjl9" frameborder="0" allowFullScreen="true"></iframe>
+        </div>
+        """
+
+        st.markdown(html_code, unsafe_allow_html=True)
+
+# PAGE 5-------------------------------------
+elif page == "Reviews":
+        st.markdown('A word cloud has been created from the accommodation reviews to show you the most common words based on their size:')   
       
 
         wordcloud = "img/nube_airbnb.png"
 
-        st.image(wordcloud,width=400, use_column_width=True)
-        st.write('-------')
-        st.write('Para información del código empleado, visita mi GitHub: https://github.com/CrisDAndres/proyecto_airbnb')
+        st.image(wordcloud,width=500, use_column_width=True)
+
+# PAGE 6-------------------------------------
+elif page == "Price predictor":
+    st.markdown("""
+        <div style='text-align: center;'>
+            <h1>Price prediction for Airbnb accommodation in Rome</h1>
+        </div>
+    """, unsafe_allow_html=True)
+    
+    ## -- File upload 
+    scaler = load('outputs/scaler.pkl')
+    model = load_model('models/price_xbg') #load the model trained with xbg
+    # Open JSON file in read mode
+    with open("outputs/mapeo.json", "r") as json_fie:
+        # Loads the content of the JSON file into a dictionary
+        encoder = json.load(json_fie)
+        
+    with open("outputs/mapeo_inverso.json", "r") as json_fie:    
+        decoder = json.load(json_fie)
+
+
+    municipi_options = [
+    'I Centro Storico',
+    'II Parioli/Nomentano',
+    'III Monte Sacro',
+    'IV Tiburtina',
+    'V Prenestino/Centocelle',
+    'VI Roma delle Torri',
+    'VII San Giovanni/Cinecittà',
+    'VIII Appia Antica',
+    'IX Eur',
+    'X Ostia/Acilia',
+    'XI Arvalia/Portuense'
+    'XII Monte Verde',
+    'XIII Aurelia',
+    'XIV Monte Mario'
+    'XV Cassia/Flaminia',
+    ]
+
+    # --------------------------------------------------------------------------------------
+
+    with st.form("prediction_form"): 
+        beds = st.number_input('No. of beds:', value=1)
+        accom = st.number_input('No. of travellers:', value=1)
+        bath = st.number_input('No. of bathrooms:', value=1)
+        barrio = st.selectbox('Choose the district of Rome you are interested in:', municipi_options)
+        submit_button = st.form_submit_button(label='Predict the price')
+
+    if submit_button:
+        input_data = pd.DataFrame([[beds, accom, bath, barrio]],
+                                columns=['beds', 'accommodates', 'bathrooms', 'neighbourhood_cleansed']) 
+
+    # 1- Encode what the user types into numbers using the mapping json.
+        input_data['neighbourhood_cleansed'] = input_data['neighbourhood_cleansed'].replace(encoder)
+        
+    # 2 - Normalise the input data
+        input_data_scaled = scaler.transform(input_data)
+        dtest = xgb.DMatrix(input_data_scaled) # convert the input data into a DMatrix object, the format used by XGBoost to make predictions.
+
+    # 3 - Make the prediction with the trained model
+        prediction = model.predict(dtest)
+        
+        predicted_price = prediction[-1]  # Generally, the prediction is in the last column.
+        st.write(f"### The predicted price of the accommodation is {predicted_price:.2f} €")
+
