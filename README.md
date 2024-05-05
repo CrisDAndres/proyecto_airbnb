@@ -21,8 +21,10 @@ The data to be worked with corresponds to the register of Airbnb listings publis
         - Data pre-processing: null and outlier repair.
         - Exploratory data analysis (EDA), including visualisation of interactive maps and other graphics.
         - A/B testing
-    2. ``2_NLP.ipynb``. **Natural Language Processing**: Creation of a word cloud visualisation illustrating the frequency and importance of words in the textual data, based on the list reviews.
-    3. ``3_ML_pricepredictor.ipynb``. Implementation of **machine learning models** to predict accommodation prices (regression model):
+    2. ``2_NLP.ipynb``. **Natural Language Processing**:
+         - Creation of a **word cloud** visualisation illustrating the frequency and importance of words in the textual data, based on the list reviews.
+         - **Sentiment analysis** of reviews and distribution of sentiment between positive, negative or neutral. Visualization.
+    4. ``3_ML_pricepredictor.ipynb``. Implementation of **machine learning models** to predict accommodation prices (regression model):
         - Preprocessing filtered dataframe used to train models.
         - Data splitting using train_test_split() from scikit-learn.
         - Data normalisation using ``StandardScaler()``.
@@ -49,7 +51,7 @@ To run this project on your local machine, follow the steps below:
 ### To do ⚙️
 
 - [x] Implementation of a machine learning model to predict accommodation prices based on a set of input parameters. 
-- [ ] Sentiment Analysis using NLTK library
+- [x] Sentiment Analysis using NLTK library
 
 ## Contact 📧
 If you have any questions or suggestions about this project, please feel free to contact me. You can get in touch with me through my social media channels.
