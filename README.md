@@ -47,6 +47,9 @@ To run this project on your local machine, follow the steps below:
 3. Run ``app_airbnb.py`` and make sure you have downloaded the ``outputs``, ``img``,``html`` and ``models`` folders in the same environment. Next, open a terminal in the app directory and run the following command ``streamlit run app_airbnb.py``.
 4. This will open a web browser ``http://localhost:8501/`` which will take you to the application.
 
+## Streamlit App demo 📹
+
+https://github.com/CrisDAndres/proyecto_airbnb/assets/132938003/6a0a5b69-62f8-419d-a699-9a2e5f675c18
 
 ### To do ⚙️
 
