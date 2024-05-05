@@ -53,7 +53,7 @@ page = option_menu(None, ["Home", "Neighbourhoods", "Other information", "Power 
 # read data
 @st.cache_data()
 def load_data():
-    df = pd.read_csv("data/airbnb_limpio.csv")
+    df = pd.read_csv("outputs/airbnb_limpio.csv")
     return df
 
 # load data
