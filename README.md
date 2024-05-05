@@ -16,12 +16,11 @@ The data to be worked with corresponds to the register of Airbnb listings publis
 - **Data**: Data for this project was obtained from the website [Inside Airbnb](https://insideairbnb.com/get-the-data/).
 - **Code**: The code used is located in the folder ``notebooks``, and includes three jupyter notebooks with different sections:
     1. ``1_Preprocessing_EDA.ipynb``:
-
-      - Loading the libraries and reading the different datasets.
-      - Dataset information.
-      - Data pre-processing: null and outlier repair.
-      - Exploratory data analysis (EDA), including visualisation of interactive maps and other graphics.
-      - A/B testing
+        - Loading the libraries and reading the different datasets.
+        - Dataset information.
+        - Data pre-processing: null and outlier repair.
+        - Exploratory data analysis (EDA), including visualisation of interactive maps and other graphics.
+        - A/B testing
     2. ``2_wordcloud.ipynb``: Creation of a word cloud visualisation illustrating the frequency and importance of words in the textual data, based on the list reviews.
     3. ``3_ML_pricepredictor.ipynb``. Implementation of **machine learning models** to predict accommodation prices (regression model):
         - Preprocessing filtered dataframe used to train models.
