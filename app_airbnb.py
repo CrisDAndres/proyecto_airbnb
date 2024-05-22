@@ -445,12 +445,12 @@ elif page == "Price predictor":
     scaler = load('outputs/scaler.pkl')
     model = load_model('models/price_xbg') #load the model trained with xbg
     # Open JSON file in read mode
-    with open("outputs/mapeo.json", "r") as json_fie:
+    with open("outputs/mapeo.json", "r") as json_file:
         # Loads the content of the JSON file into a dictionary
-        encoder = json.load(json_fie)
+        encoder = json.load(json_file)
         
-    with open("outputs/mapeo_inverso.json", "r") as json_fie:    
-        decoder = json.load(json_fie)
+    with open("outputs/mapeo_inverso.json", "r") as json_file:    
+        decoder = json.load(json_file)
 
 
     municipi_options = [
